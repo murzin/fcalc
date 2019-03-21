@@ -7,7 +7,7 @@ use v5.26.0;
 use warnings;
 no warnings 'recursion';
 
-my (@ms, @ky, %dm, %ops, @pr);
+my (@ms, @ky, %dm, %ops, @pr, $poslat);
 my %sy = qw[en | lc ( rc ) pl + mi - mu * di /];
 my %ys = reverse %sy;
 my %mx = (
@@ -78,7 +78,7 @@ my @in =  map {s/^0+(\d+):/$1:/r}
           grep {length $_}
           split /\s+/, $in;
 @in or goto NAH;
-my $poslat;
+$poslat = 0;
 for (@in) {
     unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $ys{$_}) {
         say "no such shit > $_ < in my cozy garden!";
@@ -98,12 +98,13 @@ in: for my $t (@in, '|') {
             $_ == 1 && do { push @ms, $t };
             $_ == 2 && do { push @ky, pop @ms; redo in};
             $_ == 3 && do { pop @ms };
-            $_ == 5 && do { die "wrong input $in" };
+            $_ == 5 && do { say "wrong input $in"; $poslat = 1; last in };
         }
     } else {
         push @ky, $t;
     }
 }
+goto NAH if $poslat;
 
 $ys{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
 
