@@ -8,7 +8,7 @@ use warnings;
 no warnings 'recursion';
 
 my (@ms, @ky, %dm, %ops, @pr, $poslat);
-my %sy = qw[| en ( lc ) rc + pl - mi * mu / di];
+my %sy = map {$_ => 1} qw[| ( ) + - * /];
 my @th = qw[| + - * / ( )],
 my %mx = (
     '|' => [qw[4 1 1 1 1 1 5]],
