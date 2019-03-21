@@ -8,21 +8,19 @@ use warnings;
 no warnings 'recursion';
 
 my (@ms, @ky, %dm, %ops, @pr, $poslat);
-my %sy = qw[en | lc ( rc ) pl + mi - mu * di /];
-my %ys = reverse %sy;
+my %sy = qw[| en ( lc ) rc + pl - mi * mu / di];
+my @th = qw[| + - * / ( )],
 my %mx = (
-    th => [qw[| + - * / ( )]],
-    en => [qw[4 1 1 1 1 1 5]],
-    pl => [qw[2 2 2 1 1 1 2]],
-    mi => [qw[2 2 2 1 1 1 2]],
-    mu => [qw[2 2 2 2 2 1 2]],
-    di => [qw[2 2 2 2 2 1 2]],
-    lc => [qw[5 1 1 1 1 1 3]],
+    '|' => [qw[4 1 1 1 1 1 5]],
+    '+' => [qw[2 2 2 1 1 1 2]],
+    '-' => [qw[2 2 2 1 1 1 2]],
+    '*' => [qw[2 2 2 2 2 1 2]],
+    '/' => [qw[2 2 2 2 2 1 2]],
+    '(' => [qw[5 1 1 1 1 1 3]],
 );
-
-for my $i (0..$#{$mx{th}}) {
+for my $i (0..6) {
     for (qw[| + - * / (]) {
-        $dm{$mx{th}->[$i].$_} = $mx{$ys{$_}}->[$i];
+        $dm{$th[$i].$_} = $mx{$_}->[$i];
     }
 }
 
@@ -62,7 +60,7 @@ sub nod {
     my ($x, $y) = map {abs} @_;
     return $x if $x == $y;
     return $y unless $x;
-    return ($x>=$y)? nod($x-$y, $y) : nod($x, $y-$x);
+    return ($x >= $y) ? nod($x-$y, $y) : nod($x, $y-$x);
 }
 
 say "fraction is x:y, operations: + - * /, for negation do like (0 - x:y)";
@@ -80,7 +78,7 @@ my @in =  map  { s/^0+(\d+):/$1:/r }
 @in or goto NAH;
 $poslat = 0;
 for (@in) {
-    unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $ys{$_}) {
+    unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $sy{$_}) {
         say "no such shit > $_ < in my cozy garden!";
         $poslat = 1; last;
     }
@@ -93,12 +91,12 @@ for (0..$#in) {
 @ms = qw(|);
 @ky = @pr = qw();
 in: for my $t (@in, '|') {
-    if ($ys{$t}) {
+    if ($sy{$t}) {
         for ($dm{$t.$ms[$#ms]}) {
-            $_ == 1 && do { push @ms, $t };
-            $_ == 2 && do { push @ky, pop @ms; redo in };
-            $_ == 3 && do { pop @ms };
-            $_ == 5 && do { say "wrong input $in"; $poslat = 1; last in };
+            /1/ && do { push @ms, $t };
+            /2/ && do { push @ky, pop @ms; redo in };
+            /3/ && do { pop @ms };
+            /5/ && do { say "wrong input $in"; $poslat = 1; last in };
         }
     } else {
         push @ky, $t;
@@ -106,7 +104,7 @@ in: for my $t (@in, '|') {
 }
 goto NAH if $poslat;
 
-$ys{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
+$sy{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
 
 say $pr[0]->[0] . ($pr[0]->[1] != 1 && ':'.$pr[0]->[1]);
 
