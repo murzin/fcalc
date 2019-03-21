@@ -72,18 +72,20 @@ my $in = <>;
 
 $in    =~ s/\s*:\s*/:/g;
 $in    =~ s/([()+*\/-])/ $1 /g;
-my @in =  map {s/^0+(\d+):/$1:/r }
+my @in =  map {s/^0+(\d+):/$1:/r}
           map {s/:0+$/:0/r}
-          map {/^\d+$/ ? $_.':1' : $_ }
+          map {/^\d+$/ ? $_.':1' : $_}
           grep {length $_}
           split /\s+/, $in;
 @in or goto NAH;
+my $poslat;
 for (@in) {
     unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $ys{$_}) {
         say "no such shit > $_ < in my cozy garden!";
-        goto NAH;
+        $poslat = 1; last;
     }
 }
+goto NAN if $poslat;
 for (0..$#in) {
     $in[$_] = [split ':', $in[$_]] if $in[$_] =~ /:/;
 }
