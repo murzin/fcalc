@@ -76,11 +76,11 @@ my @in =  map  { s/^0+(\d+):/$1:/r }
           grep { length $_ }
           split /\s+/, $in;
 @in or goto NAH;
-$poslat = 0;
+undef $poslat;
 for (@in) {
     unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $sy{$_}) {
         say "no such shit > $_ < in my cozy garden!";
-        $poslat = 1; last;
+        $poslat = 'yea'; last;
     }
 }
 goto NAH if $poslat;
@@ -96,7 +96,7 @@ in: for my $t (@in, '|') {
             /1/ && do { push @ms, $t };
             /2/ && do { push @ky, pop @ms; redo in };
             /3/ && do { pop @ms };
-            /5/ && do { say "wrong input $in"; $poslat = 1; last in };
+            /5/ && do { say "wrong input $in"; $poslat = 'yea'; last in };
         }
     } else {
         push @ky, $t;
