@@ -72,10 +72,10 @@ my $in = <>;
 
 $in    =~ s/\s*:\s*/:/g;
 $in    =~ s/([()+*\/-])/ $1 /g;
-my @in =  map {s/^0+(\d+):/$1:/r}
-          map {s/:0+$/:0/r}
-          map {/^\d+$/ ? $_.':1' : $_}
-          grep {length $_}
+my @in =  map  { s/^0+(\d+):/$1:/r }
+          map  { s/:0+$/:0/r }
+          map  { /^\d+$/ ? $_.':1' : $_ }
+          grep { length $_ }
           split /\s+/, $in;
 @in or goto NAH;
 $poslat = 0;
@@ -96,7 +96,7 @@ in: for my $t (@in, '|') {
     if ($ys{$t}) {
         for ($dm{$t.$ms[$#ms]}) {
             $_ == 1 && do { push @ms, $t };
-            $_ == 2 && do { push @ky, pop @ms; redo in};
+            $_ == 2 && do { push @ky, pop @ms; redo in };
             $_ == 3 && do { pop @ms };
             $_ == 5 && do { say "wrong input $in"; $poslat = 1; last in };
         }
