@@ -59,10 +59,10 @@ sub nok {
 }
 
 sub nod {
-	my ($x, $y) = map {abs} @_;
+    my ($x, $y) = map {abs} @_;
     return $x if $x == $y;
-	return $y unless $x;
-	return ($x>=$y)? nod($x-$y, $y) : nod($x, $y-$x);
+    return $y unless $x;
+    return ($x>=$y)? nod($x-$y, $y) : nod($x, $y-$x);
 }
 
 say "fraction is x:y, operations: + - * /, for negation do like (0 - x:y)";
@@ -77,9 +77,9 @@ my @in =  map {s/^0+(\d+):/$1:/r }
           map {/^\d+$/ ? $_.':1' : $_ }
           grep {length $_}
           split /\s+/, $in;
-@in or goto NAH;          
+@in or goto NAH;
 for (@in) {
-    unless(/^\d+:\d+$/ and $_ !~ /:0$/ or  $ys{$_}) {
+    unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $ys{$_}) {
         say "no such shit > $_ < in my cozy garden!";
         goto NAH;
     }
@@ -103,7 +103,7 @@ in: for my $t (@in, '|') {
     }
 }
 
-$ys{$_} ?  push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
+$ys{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
 
 say $pr[0]->[0] . ($pr[0]->[1] != 1 && ':'.$pr[0]->[1]);
 
