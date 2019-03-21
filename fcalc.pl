@@ -85,7 +85,7 @@ for (@in) {
         $poslat = 1; last;
     }
 }
-goto NAN if $poslat;
+goto NAH if $poslat;
 for (0..$#in) {
     $in[$_] = [split ':', $in[$_]] if $in[$_] =~ /:/;
 }
