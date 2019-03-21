@@ -1,12 +1,13 @@
 #!/usr/bin/env perl
 
-use v5.20.0;
+# goto NAH ПРАВЯЩИЕ КЛАССЫ! perl - МАТЬ ПОРЯДКА!
+# ФАБРИКИ - РАБОЧИМ, ДАТАЛЕЙКИ - МАТРОСАМ, СЛАВА - РОБОТАМ!
+
+use v5.26.0;
 use warnings;
 no warnings 'recursion';
 
-use Data::Dumper;
-
-my (@ms, @ky, %dm, %ops);
+my (@ms, @ky, %dm, %ops, @pr);
 my %sy = qw[en | lc ( rc ) pl + mi - mu * di /];
 my %ys = reverse %sy;
 my %mx = (
@@ -27,36 +28,28 @@ for my $i (0..$#{$mx{th}}) {
 
 @ops{qw[+ - * /]} = (
     sub { 
-        my $op1 = [split ':', shift()];
-        my $op2 = [split ':', shift()]; 
-        my $nok = nok($op1->[1], $op2->[1]);
-        my $c = $op1->[0] * ($nok / $op1->[1]) + $op2->[0] * ($nok / $op2->[1]);
+        my $nok = nok($_[0]->[1], $_[1]->[1]);
+        my $c = $_[0]->[0] * ($nok / $_[0]->[1]) + $_[1]->[0] * ($nok / $_[1]->[1]);
         my $nod = nod($c, $nok);
-        return $c/$nod.':'.$nok/$nod;
+        return [$c/$nod, $nok/$nod];
     },
     sub { 
-        my $op2 = [split ':', shift()];
-        my $op1 = [split ':', shift()]; 
-        my $nok = nok($op1->[1], $op2->[1]);
-        my $c = $op1->[0] * ($nok / $op1->[1]) - $op2->[0] * ($nok / $op2->[1]);
+        my $nok = nok($_[0]->[1], $_[1]->[1]);
+        my $c = $_[1]->[0] * ($nok / $_[1]->[1]) - $_[0]->[0] * ($nok / $_[0]->[1]);
         my $nod = nod($c, $nok);
-        return $c/$nod.':'.$nok/$nod;
+        return [$c/$nod, $nok/$nod];
     },
     sub {
-        my $op1 = [split ':', shift()]; 
-        my $op2 = [split ':', shift()];
-        my $c = $op1->[0] * $op2->[0];
-        my $z = $op1->[1] * $op2->[1];
+        my $c = $_[0]->[0] * $_[1]->[0];
+        my $z = $_[0]->[1] * $_[1]->[1];
         my $nod = nod($c, $z);
-        return $c/$nod.':'.$z/$nod;
+        return [$c/$nod, $z/$nod];
     },
     sub {
-        my $op2 = [split ':', shift()];
-        my $op1 = [split ':', shift()]; 
-        my $c = $op1->[0] * $op2->[1];
-        my $z = $op1->[1] * $op2->[0];
+        my $c = $_[1]->[0] * $_[0]->[1];
+        my $z = $_[1]->[1] * $_[0]->[0];
         my $nod = nod($c, $z);
-        return $c/$nod.':'.$z/$nod;
+        return [$c/$nod, $z/$nod];
     },
 );
 
@@ -72,12 +65,10 @@ sub nod {
 	return ($x>=$y)? nod($x-$y, $y) : nod($x, $y-$x);
 }
 
-NAH:
-my $in = '11-(8:3+ 2: 3 * 5 : 7 )/( 1:2 + 3 * 2 :5 -4 :7 )';
-#my $in = '2:3 / 2';
-#my $in = '(000 - 2:3) +2:3 * 1:2 + 2:3';
-#print '> ';
-#my $in = <>;
+say "fraction is x:y, operations: + - * /, for negation do like (0 - x:y)";
+
+NAH: print '> ';
+my $in = <>;
 
 $in    =~ s/\s*:\s*/:/g;
 $in    =~ s/([()+*\/-])/ $1 /g;
@@ -86,48 +77,34 @@ my @in =  map {s/^0+(\d+):/$1:/r }
           map {/^\d+$/ ? $_.':1' : $_ }
           grep {length $_}
           split /\s+/, $in;
-$" = '_';
-say "@in";
+@in or goto NAH;          
 for (@in) {
     unless(/^\d+:\d+$/ and $_ !~ /:0$/ or  $ys{$_}) {
         say "no such shit > $_ < in my cozy garden!";
-        #goto NAH;
-        exit;
+        goto NAH;
     }
+}
+for (0..$#in) {
+    $in[$_] = [split ':', $in[$_]] if $in[$_] =~ /:/;
 }
 
 @ms = qw(|);
-@ky = qw();
-for my $t (@in, '|') {
+@ky = @pr = qw();
+in: for my $t (@in, '|') {
     if ($ys{$t}) {
-        my $lvm = $ms[$#ms];
-        my $ch = $dm{$t.$lvm};
-        if ($ch == 1) {
-            push @ms, $t;
-        } elsif ($ch == 2) {
-            push @ky, pop @ms;
-            redo;
-        } elsif ($ch == 3) {
-            pop @ms;
-        } elsif ($ch == 4) {
-            # done
-        } else {
-            die "ch - $ch , wrong input $in";
+        for ($dm{$t.$ms[$#ms]}) {
+            $_ == 1 && do { push @ms, $t };
+            $_ == 2 && do { push @ky, pop @ms; redo in};
+            $_ == 3 && do { pop @ms };
+            $_ == 5 && do { die "wrong input $in" };
         }
     } else {
         push @ky, $t;
     }
 }
 
-my @pr;
-for my $t (@ky) {
-    if ($ys{$t}) {
-        push @pr, $ops{$t}->(pop @pr, pop @pr);
-    } else {
-        push @pr, $t;
-    }
-}
+$ys{$_} ?  push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
 
-say $pr[0] =~ s/:1$//r;
-#goto HAHA;
+say $pr[0]->[0] . ($pr[0]->[1] != 1 && ':'.$pr[0]->[1]);
 
+goto NAH;
