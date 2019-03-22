@@ -19,7 +19,8 @@ my %mx = (
     '(' => [qw[5 1 1 1 1 1 3]],
 );
 for my $i (0..6) {
-    for (qw[| + - * / (]) {
+    for (@th) {
+        next unless exists $mx{$_};
         $dm{$th[$i].$_} = $mx{$_}->[$i];
     }
 }
