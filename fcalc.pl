@@ -1,13 +1,10 @@
 #!/usr/bin/env perl
 
-# goto NAH ПРАВЯЩИЕ КЛАССЫ! perl - МАТЬ ПОРЯДКА!
-# ФАБРИКИ - РАБОЧИМ, ДАТАЛЕЙКИ - МАТРОСАМ, СЛАВА - РОБОТАМ!
-
 use v5.26.0;
 use warnings;
 no warnings 'recursion';
 
-my (@ms, @ky, %dm, %ops, @pr, $poslat);
+my (@ms, @ky, %dm, %ops, @pr, $again);
 my @th = qw[| + - * / ( )];
 my %sy = map {$_ => 1} @th;
 my %mx = (
@@ -63,10 +60,10 @@ sub nod {
     return $y unless $x;
     return ($x >= $y) ? nod($x-$y, $y) : nod($x, $y-$x);
 }
+say "Fractional calculator";
+say "fraction should be presented as `x:y`, operations: + - * /, for negation do like (0 - x:y)";
 
-say "fraction is x:y, operations: + - * /, for negation do like (0 - x:y)";
-
-NAH: print '> ';
+DOINPUT: print '> ';
 my $in = <>;
 
 $in    =~ s/\s*:\s*/:/g;
@@ -76,15 +73,15 @@ my @in =  map  { s/^0+(\d+):/$1:/r }
           map  { /^\d+$/ ? $_.':1' : $_ }
           grep { length $_ }
           split /\s+/, $in;
-@in or goto NAH;
-undef $poslat;
+@in or goto DOINPUT;
+undef $again;
 for (@in) {
     unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $sy{$_}) {
         say "no such shit > $_ < in my cozy garden!";
-        $poslat = 'yea'; last;
+        $again = 'yea'; last;
     }
 }
-goto NAH if $poslat;
+goto DOINPUT if $again;
 for (0..$#in) {
     $in[$_] = [split ':', $in[$_]] if $in[$_] =~ /:/;
 }
@@ -97,16 +94,16 @@ in: for my $t (@in, '|') {
             /1/ && do { push @ms, $t };
             /2/ && do { push @ky, pop @ms; redo in };
             /3/ && do { pop @ms };
-            /5/ && do { say "wrong input $in"; $poslat = 'yea'; last in };
+            /5/ && do { say "wrong input $in"; $again = 'yea'; last in };
         }
     } else {
         push @ky, $t;
     }
 }
-goto NAH if $poslat;
+goto DOINPUT if $again;
 
 $sy{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
 
 say $pr[0]->[0] . ($pr[0]->[1] != 1 && ':'.$pr[0]->[1]);
 
-goto NAH;
+goto DOINPUT;
