@@ -1,5 +1,7 @@
 #!/usr/bin/env perl
 
+# NOTE: just for sure: NO SUCH VAR NAMES IN REAL PROD, this script was done just for fun
+
 use v5.26.0;
 use warnings;
 no warnings 'recursion';
@@ -63,47 +65,47 @@ sub nod {
 say "Fractional calculator";
 say "fraction should be presented as `x:y`, operations: + - * /, for negation do like (0 - x:y)";
 
-DOINPUT: print '> ';
-my $in = <>;
-
-$in    =~ s/\s*:\s*/:/g;
-$in    =~ s/([()+*\/-])/ $1 /g;
-my @in =  map  { s/^0+(\d+):/$1:/r }
-          map  { s/:0+$/:0/r }
-          map  { /^\d+$/ ? $_.':1' : $_ }
-          grep { length $_ }
-          split /\s+/, $in;
-@in or goto DOINPUT;
-undef $again;
-for (@in) {
-    unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $sy{$_}) {
-        say "no such shit > $_ < in my cozy garden!";
-        $again = 'yea'; last;
-    }
-}
-goto DOINPUT if $again;
-for (0..$#in) {
-    $in[$_] = [split ':', $in[$_]] if $in[$_] =~ /:/;
-}
-
-@ms = qw(|);
-@ky = @pr = qw();
-in: for my $t (@in, '|') {
-    if ($sy{$t}) {
-        for ($dm{$t.$ms[$#ms]}) {
-            /1/ && do { push @ms, $t };
-            /2/ && do { push @ky, pop @ms; redo in };
-            /3/ && do { pop @ms };
-            /5/ && do { say "wrong input $in"; $again = 'yea'; last in };
+while (1) {
+    print '> ';
+    my $in = <>;
+    
+    $in    =~ s/\s*:\s*/:/g;
+    $in    =~ s/([()+*\/-])/ $1 /g;
+    my @in =  map  { s/^0+(\d+):/$1:/r }
+              map  { s/:0+$/:0/r }
+              map  { /^\d+$/ ? $_.':1' : $_ }
+              grep { length $_ }
+              split /\s+/, $in;
+    @in or next;
+    undef $again;
+    for (@in) {
+        unless(/^\d+:\d+$/ and $_ !~ /:0$/ or $sy{$_}) {
+            say "no such shit > $_ < in my cozy garden!";
+            $again = 'yea'; last;
         }
-    } else {
-        push @ky, $t;
     }
+    next if $again;
+    for (0..$#in) {
+        $in[$_] = [split ':', $in[$_]] if $in[$_] =~ /:/;
+    }
+    
+    @ms = qw(|);
+    @ky = @pr = qw();
+    in: for my $t (@in, '|') {
+        if ($sy{$t}) {
+            for ($dm{$t.$ms[$#ms]}) {
+                /1/ && do { push @ms, $t };
+                /2/ && do { push @ky, pop @ms; redo in };
+                /3/ && do { pop @ms };
+                /5/ && do { say "wrong input $in"; $again = 'yea'; last in };
+            }
+        } else {
+            push @ky, $t;
+        }
+    }
+    next if $again;
+    
+    $sy{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
+    
+    say $pr[0]->[0] . ($pr[0]->[1] != 1 && ':'.$pr[0]->[1]);
 }
-goto DOINPUT if $again;
-
-$sy{$_} ? push @pr, $ops{$_}->(pop @pr, pop @pr) : push @pr, $_ for @ky;
-
-say $pr[0]->[0] . ($pr[0]->[1] != 1 && ':'.$pr[0]->[1]);
-
-goto DOINPUT;
